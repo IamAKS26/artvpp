@@ -2,10 +2,12 @@ import { useState } from 'react';
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 import { stats } from "../data/stats";
-import { DollarSign, ShoppingBag, Image as ImageIcon, Clock, Plus, BarChart2, MoreVertical, Search, Filter, Settings } from "lucide-react";
+import { DollarSign, ShoppingBag, Image as ImageIcon, Clock, Plus, BarChart2, MoreVertical, Search, Filter, Settings, Menu, X } from "lucide-react";
+import { motion, AnimatePresence } from 'framer-motion';
 
 const VendorDashboard = () => {
     const [activeTab, setActiveTab] = useState('overview');
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     // Mock Data for "My Products"
     const myProducts = [
@@ -42,8 +44,19 @@ const VendorDashboard = () => {
 
             <main className="pt-24 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
                 <div className="flex flex-col md:flex-row gap-8">
-                    {/* Sidebar */}
-                    <aside className="w-full md:w-64 space-y-6">
+                    {/* Mobile Sidebar Toggle */}
+                    <div className="md:hidden mb-6">
+                        <button
+                            className="w-full flex items-center justify-center gap-2 py-2 px-4 border border-gray-200 dark:border-white/10 rounded-xl hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+                            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                        >
+                            <Menu size={20} />
+                            {isSidebarOpen ? 'Close Menu' : 'Show Vendor Menu'}
+                        </button>
+                    </div>
+
+                    {/* Desktop Sidebar (Hidden on Mobile) */}
+                    <aside className="hidden md:block w-64 space-y-6">
                         <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm">
                             <div className="flex items-center gap-3 mb-6">
                                 <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
@@ -86,6 +99,76 @@ const VendorDashboard = () => {
                             </button>
                         </nav>
                     </aside>
+
+                    {/* Mobile Sidebar Drawer */}
+                    <AnimatePresence>
+                        {isSidebarOpen && (
+                            <>
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    onClick={() => setIsSidebarOpen(false)}
+                                    className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] md:hidden"
+                                />
+                                <motion.aside
+                                    initial={{ x: "-100%" }}
+                                    animate={{ x: 0 }}
+                                    exit={{ x: "-100%" }}
+                                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                    className="fixed top-0 left-0 h-full w-3/4 max-w-sm bg-white dark:bg-zinc-900 shadow-2xl z-[70] p-6 overflow-y-auto md:hidden"
+                                >
+                                    <div className="flex justify-between items-center mb-6">
+                                        <h2 className="font-bold text-xl">Vendor Menu</h2>
+                                        <button onClick={() => setIsSidebarOpen(false)} className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full">
+                                            <X size={24} />
+                                        </button>
+                                    </div>
+
+                                    <div className="flex items-center gap-3 mb-8 p-4 bg-gray-50 dark:bg-white/5 rounded-xl">
+                                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                                            <ImageIcon size={20} />
+                                        </div>
+                                        <div>
+                                            <h2 className="font-bold">Elena R.</h2>
+                                            <p className="text-xs text-gray-500">Pro Seller</p>
+                                        </div>
+                                    </div>
+
+                                    <button className="w-full mb-6 py-3 bg-primary text-white rounded-xl font-medium hover:bg-primary/90 transition-colors flex items-center justify-center gap-2">
+                                        <Plus size={18} /> New Artwork
+                                    </button>
+
+                                    <nav className="space-y-2">
+                                        <button
+                                            onClick={() => { setActiveTab('overview'); setIsSidebarOpen(false); }}
+                                            className={`w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 transition-colors ${activeTab === 'overview' ? 'bg-gray-100 dark:bg-white/10 font-medium' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-white/5'}`}
+                                        >
+                                            <BarChart2 size={20} /> Overview
+                                        </button>
+                                        <button
+                                            onClick={() => { setActiveTab('products'); setIsSidebarOpen(false); }}
+                                            className={`w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 transition-colors ${activeTab === 'products' ? 'bg-gray-100 dark:bg-white/10 font-medium' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-white/5'}`}
+                                        >
+                                            <ImageIcon size={20} /> My Products
+                                        </button>
+                                        <button
+                                            onClick={() => { setActiveTab('orders'); setIsSidebarOpen(false); }}
+                                            className={`w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 transition-colors ${activeTab === 'orders' ? 'bg-gray-100 dark:bg-white/10 font-medium' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-white/5'}`}
+                                        >
+                                            <ShoppingBag size={20} /> Orders
+                                        </button>
+                                        <button
+                                            onClick={() => { setActiveTab('settings'); setIsSidebarOpen(false); }}
+                                            className={`w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 transition-colors ${activeTab === 'settings' ? 'bg-gray-100 dark:bg-white/10 font-medium' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-white/5'}`}
+                                        >
+                                            <Settings size={20} /> Settings
+                                        </button>
+                                    </nav>
+                                </motion.aside>
+                            </>
+                        )}
+                    </AnimatePresence>
 
                     {/* Main Content */}
                     <div className="flex-1">

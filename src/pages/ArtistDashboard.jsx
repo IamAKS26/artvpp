@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
-import { User, Palette, BarChart2, DollarSign, Clock, Settings, Upload, Image as ImageIcon } from "lucide-react";
+import { User, Palette, BarChart2, DollarSign, Clock, Settings, Upload, Image as ImageIcon, Menu, X } from "lucide-react";
 import Button from '../components/ui/Button';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const ArtistDashboard = () => {
     const [activeTab, setActiveTab] = useState('overview');
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-black/95 text-gray-900 dark:text-white transition-colors duration-300">
@@ -13,8 +15,20 @@ const ArtistDashboard = () => {
 
             <main className="pt-24 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
                 <div className="flex flex-col md:flex-row gap-8">
-                    {/* Sidebar */}
-                    <aside className="w-full md:w-64 space-y-6">
+                    {/* Mobile Sidebar Toggle */}
+                    <div className="md:hidden mb-6">
+                        <Button
+                            variant="outline"
+                            className="w-full flex items-center justify-center gap-2"
+                            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                        >
+                            <Menu size={20} />
+                            {isSidebarOpen ? 'Close Menu' : 'Show Dashboard Menu'}
+                        </Button>
+                    </div>
+
+                    {/* Desktop Sidebar (Hidden on Mobile) */}
+                    <aside className="hidden md:block w-64 space-y-6">
                         <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm text-center">
                             <div className="w-24 h-24 rounded-full bg-gray-200 mx-auto mb-4 overflow-hidden border-4 border-white dark:border-zinc-800 shadow-md">
                                 <img src={`https://ui-avatars.com/api/?name=New+Artist&size=100`} alt="Profile" />
@@ -41,6 +55,64 @@ const ArtistDashboard = () => {
                             ))}
                         </nav>
                     </aside>
+
+                    {/* Mobile Sidebar Drawer */}
+                    <AnimatePresence>
+                        {isSidebarOpen && (
+                            <>
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    onClick={() => setIsSidebarOpen(false)}
+                                    className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] md:hidden"
+                                />
+                                <motion.aside
+                                    initial={{ x: "-100%" }}
+                                    animate={{ x: 0 }}
+                                    exit={{ x: "-100%" }}
+                                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                    className="fixed top-0 left-0 h-full w-3/4 max-w-sm bg-white dark:bg-zinc-900 shadow-2xl z-[70] p-6 overflow-y-auto md:hidden"
+                                >
+                                    <div className="flex justify-between items-center mb-6">
+                                        <h2 className="font-bold text-xl">Menu</h2>
+                                        <button onClick={() => setIsSidebarOpen(false)} className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full">
+                                            <X size={24} />
+                                        </button>
+                                    </div>
+
+                                    <div className="text-center mb-6">
+                                        <div className="w-20 h-20 rounded-full bg-gray-200 mx-auto mb-3 overflow-hidden border-4 border-gray-50 dark:border-zinc-800">
+                                            <img src={`https://ui-avatars.com/api/?name=New+Artist&size=100`} alt="Profile" />
+                                        </div>
+                                        <h3 className="font-bold">New Artist</h3>
+                                        <p className="text-xs text-gray-500">Level 1 Seller</p>
+                                    </div>
+
+                                    <nav className="space-y-2">
+                                        {[
+                                            { id: 'overview', icon: BarChart2, label: 'Overview' },
+                                            { id: 'services', icon: Palette, label: 'My Services' },
+                                            { id: 'earnings', icon: DollarSign, label: 'Earnings' },
+                                            { id: 'settings', icon: Settings, label: 'Profile' },
+                                        ].map(item => (
+                                            <button
+                                                key={item.id}
+                                                onClick={() => { setActiveTab(item.id); setIsSidebarOpen(false); }}
+                                                className={`w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 transition-colors ${activeTab === item.id ? 'bg-gray-100 dark:bg-white/10 font-medium' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-white/5'}`}
+                                            >
+                                                <item.icon size={20} /> {item.label}
+                                            </button>
+                                        ))}
+                                    </nav>
+
+                                    <div className="mt-8 pt-6 border-t border-gray-100 dark:border-white/5">
+                                        <Button variant="outline" size="sm" className="w-full">Sign Out</Button>
+                                    </div>
+                                </motion.aside>
+                            </>
+                        )}
+                    </AnimatePresence>
 
                     {/* Main Content */}
                     <div className="flex-1">
